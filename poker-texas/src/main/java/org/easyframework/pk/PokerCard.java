@@ -1,26 +1,29 @@
 package org.easyframework.pk;
 
 /**
- * 一张poker牌，用二进制表示
+ * 一张扑克牌
  * <br>
- * 0b0001表示方块  
- * 0b0010表示黑花
- * 0b0100表示红挑
- * 0b1000表示黑挑
- * 0b0000 0000 0001 0001
- * 
+ * 1=Ace,2=2,11=Jack,12=Queen,13=king,14=BlackJoker 15=ReadJoker
+ * <br>
+ * 0=方块,1=梅花,2=红桃,3=黑桃
+ * <br>
  * @Description: 
  * @author artdi artditan@gmail.com 
  * @date 2017年7月2日 下午6:10:25
  */
 public class PokerCard {
+	public final static int WEEK_ACE=1;
 	/**
 	 * 最小顺子的值，表示Ace,2,3,4,5
 	 */
 	public final static int MINE_STRAIGHT=62;
 	public final static int MAX_STRAIGHT=MINE_STRAIGHT<<5;
+	/**
+	 * 表示无效牌
+	 */
+	public final static int UNINITCARD_ID=-1;
 	
-	private int id=-1;
+	private int id=UNINITCARD_ID;
 	private int week=1;  //表示点数 1:Ace  13:King  14:BlackJoker 15:ReadJoker
 	private int session=0;  //表示花色
 	private String name;
@@ -43,19 +46,23 @@ public class PokerCard {
 	public String toString(){
 		return this.name;
 	}
-	
+	/**
+	 * 
+	 * @param week 1=Ace,2=2,11=Jack,12=Queen,13=king,14=BlackJoker 15=ReadJoker
+	 * @param session 0=方块,1=梅花,2=红桃,3=黑桃
+	 */
 	public PokerCard(int week,int session){
 		
 		if(week>0 && week< 16 && session>=0 && session <4){
 			this.week=week;
 			this.session=session;
 			this.name=getName();
-			this.id=1<<(this.week+4)&1<<this.session;
+			this.id=1<<(this.week+4)|1<<this.session;
 		}else{
 			throw new RuntimeException("非法扑克牌点数,week:"+week+",session"+session);
 		}
 	}
-	private String getName(){
+	public String getName(){
 		String name="";
 		if(this.week==14){
 			name= "小王";
@@ -66,8 +73,35 @@ public class PokerCard {
 		}
 		return name;
 	}
-	
-	
+	/**
+	 * 按点数花色创建一摞牌。
+	 * @param cards  ｛点数，花色，点数，花色。。。。｝
+	 * @return
+	 */
+	public static PokerCard[] createPokerCardArray(int[] cards){
+		if(null!=cards&&cards.length/2>0){
+			PokerCard[] pokerCards=new PokerCard[cards.length/2];
+			int n=0;
+			for(int i=0;i<cards.length;i=i+2){
+				pokerCards[n++]=new PokerCard(cards[i],cards[i+1]);
+			}
+			return pokerCards;
+		}else{
+			throw new RuntimeException("非法扑克牌点数,cards:"+cards);
+		}
+	}
+	public static String getPokerCardsName(PokerCard[] pokers){
+		StringBuilder sb=new StringBuilder();
+		for(PokerCard poker:pokers){
+			if(poker!=null)
+			sb.append(poker.getName()).append(",");
+		}
+		return sb.toString();
+	}
+	/**
+	 * 创建一副52张牌的
+	 * @return
+	 */
 	public static PokerCard[] create52PokerCard(){
 		PokerCard[] pokerCards=new PokerCard[52];
 		int index=0;
@@ -80,40 +114,4 @@ public class PokerCard {
 		return pokerCards;
 	}
 	
-	
-	/*
-	public static final int Club=0x01;
-	public static final int Diamond=0x01<<1;
-	public static final int Heart=0x01<<2;
-	public static final int Spade=0x01<<3;
-	
-	public static final int ACE=0x01<<4;
-	public static final int One=0x01<<5;
-	public static final int Two=0x01<<6;
-	public static final int Three=0x01<<7;
-	public static final int Four=0x01<<8;
-	public static final int Five=0x01<<9;
-	public static final int Six=0x01<<10;
-	public static final int Seven=0x01<<11;
-	public static final int Eight=0x01<<12;
-	public static final int Nine=0x01<<13;
-	public static final int Ten=0x01<<14;
-	public static final int Jack=0x01<<15;
-	public static final int Queen=0x01<<16;
-	public static final int King=0x01<<17;
-	
-	public static final int BlackJoker=0x01<<18;
-	public static final int ReadJoker=0x01<<19;
-	
-	
-	private int value=1;
-	public int getValue(){
-		return value;
-	}
-	public String toString(){
-		return "";
-	}
-	public PokerCard(int v){
-		this.value=v;
-	}*/
 }

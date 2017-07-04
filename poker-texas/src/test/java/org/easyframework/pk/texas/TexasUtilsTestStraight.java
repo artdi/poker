@@ -45,7 +45,7 @@ public class TexasUtilsTestStraight {
 		Assert.assertNotNull(newPoker);
 		//int[] exp={0,2,3,4,6};
 		//Assert.assertArrayEquals(exp, newPoker.getMaxPoint());
-		Assert.assertTrue(62==newPoker.getWight());
+		Assert.assertTrue(62==newPoker.getWeight());
 		
 		
 	}
