@@ -15,20 +15,34 @@ package org.easyframework.pk.texas;
 public class TexasPokerHandPoint {
 
 	/**
-	 * 同花顺＝同花顺权重＋顺子最大点
+	 * 
+	 * 同花顺＝同花顺权重＋顺子最大点  ＊
 	 * 四条＝四条权重＋四条点数
 	 * 葫芦＝葫芦权重＋三条点数
-	 * 同花＝同花权重＋同花最大点
-	 * 顺子＝顺子权重＋顺子最大点
+	 * 同花＝同花权重＋同花点数       ＊
+	 * 顺子＝顺子权重＋顺子最大点     ＊
 	 * 三条＝三条权重＋三条点数
-	 * 两对＝两对权重＋两对点数＋最大点数
-	 * 一对＝一对权重＋一对点数＋最大点数＋最大点数＋最大点数
-	 * 高牌＝最大点数＋最大点数＋最大点数最大点数＋最大点数
+	 * 两对＝两对权重＋两对点数＋最大点数   ＊
+	 * 一对＝一对权重＋一对点数＋最大点数＋最大点数＋最大点数  ＊
+	 * 高牌＝最大点数＋最大点数＋最大点数＋最大点数＋最大点数  ＊
 	 */
+	//private final static long hightPointWeight=0x1;
+	private final static long pairWeight=0x1<<32;
+	private final static long threeWeight=0x1<<48;
+	private final static long straightWeight=0x1<<49;
+	private final static long flushWeight=0x1<<50;
+	private final static long fullHouseWeight=0x1<<51;
+	private final static long fourWeight=0x1<<52;
+	private final static long flushStraightWeight=0x1<<53;
+	
+	
+	
+	
 	private int weight=0;
 	private int[] maxPoint={-1,-1,-1,-1,-1};
 	
 	public int[] getMaxPoint() {
+		long a=Long.MAX_VALUE;
 		return maxPoint;
 	}
 

@@ -61,6 +61,9 @@ public class TexasPokerHand extends TexasPokerHandPoint{
 			throw new TexasException(101,"玩家当前不能接收第五张公共牌",null);
 		}
 	}
+	public int getCardsNum() {
+		return cardsNum;
+	}
 	
 
 }
