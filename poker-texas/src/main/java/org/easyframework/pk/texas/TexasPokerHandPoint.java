@@ -35,7 +35,16 @@ public class TexasPokerHandPoint {
 	private final static long fourWeight=0x1<<52;
 	private final static long flushStraightWeight=0x1<<53;
 	
+	public final static int MINI_STRAIGHT_WEIGHT=62;//0b111110=62; 表示最小顺子
 	
+	private boolean isFlushStraight=false;
+	private boolean isFlush=false;
+	private boolean isStraight=false;
+	private boolean isFour=false;
+	private boolean isThree=false;
+	private boolean isTwoPair=false;
+	private boolean isPair=false;
+	private boolean isSingle=false;
 	
 	
 	private int weight=0;
@@ -53,7 +62,72 @@ public class TexasPokerHandPoint {
 	public void setWeight(int weight) {
 		this.weight = weight;
 	}
+
 	
+	public boolean isFlushStraight() {
+		return isFlushStraight;
+	}
+
+	public void setFlushStraight(boolean isFlushStraight) {
+		this.isFlushStraight = isFlushStraight;
+	}
+
+	public boolean isFlush() {
+		return isFlush;
+	}
+
+	public void setFlush(boolean isFlush) {
+		this.isFlush = isFlush;
+	}
+
+	public boolean isStraight() {
+		return isStraight;
+	}
+
+	public void setStraight(boolean isStraight) {
+		this.isStraight = isStraight;
+	}
+
+	public boolean isFour() {
+		return isFour;
+	}
+
+	public void setFour(boolean isFour) {
+		this.isFour = isFour;
+	}
+
+	public boolean isThree() {
+		return isThree;
+	}
+
+	public void setThree(boolean isThree) {
+		this.isThree = isThree;
+	}
+
+	public boolean isTwoPair() {
+		return isTwoPair;
+	}
+
+	public void setTwoPair(boolean isTwoPair) {
+		this.isTwoPair = isTwoPair;
+	}
+
+	public boolean isPair() {
+		return isPair;
+	}
+
+	public void setPair(boolean isPair) {
+		this.isPair = isPair;
+	}
+
+	public boolean isSingle() {
+		return isSingle;
+	}
+
+	public void setSingle(boolean isSingle) {
+		this.isSingle = isSingle;
+	}
+
 
 
 }
