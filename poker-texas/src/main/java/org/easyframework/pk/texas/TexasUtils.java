@@ -64,7 +64,6 @@ public class TexasUtils {
 				}
 				return p;
 			}else{
-				//p.setSingle(true);//不一定是单牌，有可能存在一对或三张，
 				//由大到小选取远素
 				int singleWeight=0;
 				int selectIndex=0;
@@ -72,7 +71,11 @@ public class TexasUtils {
 					int weekValue=1<<week;
 					if((weekValue&tempValue)>0){
 						for(int i=0;i<pokers.length;i++){
-							if(pokers[i].getWeek()==week){
+							int pokerWeek=pokers[i].getWeek();
+							if(pokerWeek==PokerCard.WEEK_ACE){
+								pokerWeek=14;
+							}
+							if(pokerWeek==week){
 								singleWeight=singleWeight|week;
 								p.getMaxPoint()[selectIndex++]=i;
 								break;
@@ -186,8 +189,12 @@ public class TexasUtils {
 			 
 		 }//计算葫芦
 		 
-		 
 		 //计算最大的顺子
+		 //计算三条
+		 
+		 //计算两对
+		 //计算一对
+		 //计算高牌
 		 
 		 return pokerHand;
 	}
