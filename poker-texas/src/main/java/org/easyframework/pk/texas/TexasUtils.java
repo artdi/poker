@@ -97,11 +97,11 @@ public class TexasUtils {
 	 * @param pokerHand
 	 */
 	public static TexasPokerHand countValue(TexasPokerHand pokerHand){
-		 PokerCard[] maxCard=new PokerCard[5];
-		 List<Integer> theSameWeekCardPoint;
+		 //PokerCard[] maxCard=new PokerCard[5];
+		 //List<Integer> theSameWeekCardPoint;
 		 PokerCard[] pokers=pokerHand.getPokers();
 		 
-		 int[] maxPoint={-1,-1,-1,-1,-1};
+		 //int[] maxPoint={-1,-1,-1,-1,-1};
 		 
 		 List<Integer>[] weekNum=new LinkedList[15];
 		 
@@ -113,7 +113,7 @@ public class TexasUtils {
 		 int maxSameWeeNum=0;//最大相同张数 1-4
 		 int maxSameSessionNum=0;//最多花色的数量
 		 int maxSession=-1;//最多的花色
-		 int maxWeek=0;//最大点数 ACE 14点最大
+		 //int maxWeek=0;//最大点数 ACE 14点最大
 		 //int 
 		 for(int i=0;i<pokers.length;i++){
 			 //记录算点数及顺子
