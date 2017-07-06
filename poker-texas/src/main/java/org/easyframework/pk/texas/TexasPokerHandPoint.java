@@ -41,6 +41,7 @@ public class TexasPokerHandPoint {
 	private boolean isFlush=false;
 	private boolean isStraight=false;
 	private boolean isFour=false;
+	private boolean isFullHouse=false;
 	private boolean isThree=false;
 	private boolean isTwoPair=false;
 	private boolean isPair=false;
@@ -126,6 +127,14 @@ public class TexasPokerHandPoint {
 
 	public void setSingle(boolean isSingle) {
 		this.isSingle = isSingle;
+	}
+
+	public boolean isFullHouse() {
+		return isFullHouse;
+	}
+
+	public void setFullHouse(boolean isFullHouse) {
+		this.isFullHouse = isFullHouse;
 	}
 
 

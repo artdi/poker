@@ -108,8 +108,8 @@ public class TexasUtils {
 		 List<Integer>[] sessionNum=new LinkedList[4];
 		 long weekValues=0;
 		 
-		 int maxSameWeek=0;
-		 int secondSameWeek=0;
+		// int maxSameWeek=0;
+		 //int secondSameWeek=0;
 		 int maxSameWeeNum=0;//最大相同张数 1-4
 		 int maxSameSessionNum=0;//最多花色的数量
 		 int maxSession=-1;//最多的花色
@@ -185,16 +185,122 @@ public class TexasUtils {
 			 }else{
 				 pokerHand.setFlush(true);
 			 }
-		 }else if(true){//计算四条
+		 }else if(maxSameWeeNum==4){//计算四条
+			 pokerHand.setFour(true);
+			 int haveSelect=0;
+			 //选择四条
+			 for(int week=14;week>0;week--){
+				 if(weekNum[week]!=null&&weekNum[week].size()==4){
+					 for(Integer p: weekNum[week]){
+						pokerHand.getMaxPoint()[haveSelect++]=p;
+					 }
+					 weekNum[week]=null;
+				 }
+			 }
+			 //选择另一条最大的 
+			 for(int week=14;week>0;week--){
+				 if(weekNum[week]!=null){
+					 pokerHand.getMaxPoint()[haveSelect++]=weekNum[week].get(0);
+				 }
+			 }
 			 
-		 }//计算葫芦
+		 }else if(maxSameWeeNum==3){//计算葫芦 或三条
+			 //pokerHand.setFour(true);
+			 int haveSelect=0;
+			 //选择三条
+			 for(int week=14;week>0;week--){
+				 if(weekNum[week]!=null&&weekNum[week].size()==3){
+					 for(Integer p: weekNum[week]){
+						if(haveSelect>4){
+							pokerHand.setFullHouse(true);
+							break;
+						}
+						pokerHand.getMaxPoint()[haveSelect++]=p;
+					 }
+					 weekNum[week]=null;
+				 }
+				 if(haveSelect>4){
+						break;
+				 }
+			 }
+			 //先选择是否有两条以上的，有则从中选择最大的两条 
+			 for(int week=14;week>0;week--){
+				 if(weekNum[week]!=null&&weekNum[week].size()==2){
+					 for(Integer p: weekNum[week]){
+						 if(haveSelect>4){
+								break;
+						}
+						pokerHand.getMaxPoint()[haveSelect++]=p;
+					 }
+					 weekNum[week]=null;
+					 pokerHand.setFullHouse(true);
+				 }
+			 }
+			 //如果不是葫芦，选择另两条最大的单牌 
+			 if(!pokerHand.isFullHouse()){
+				 for(int week=14;week>0;week--){
+					 if(haveSelect>4){
+						 break;
+					 }
+					 if(weekNum[week]!=null){
+						 pokerHand.getMaxPoint()[haveSelect++]=weekNum[week].get(0);
+					 }
+				 }
+				 pokerHand.setThree(true);
+			 }
+		 }else if(maxSameWeeNum==2){  //计算对子
+			 int haveSelect=0;
+			 //选择两条
+			 for(int week=14;week>0;week--){
+				 if(weekNum[week]!=null&&weekNum[week].size()==2){
+					 if(pokerHand.isPair()){
+						 pokerHand.setTwoPair(true);
+					 }else{
+						 pokerHand.setPair(true);
+					 }
+					 for(Integer p: weekNum[week]){
+						if(haveSelect>4){
+							break;
+						}
+						pokerHand.getMaxPoint()[haveSelect++]=p;
+					 }
+					 weekNum[week]=null;
+				 }
+				 if(haveSelect>4){
+						break;
+				 }
+			 }
+			 for(int week=14;week>0;week--){
+				 if(haveSelect>4){
+					 break;
+				 }
+				 if(weekNum[week]!=null){
+					 pokerHand.getMaxPoint()[haveSelect++]=weekNum[week].get(0);
+				 }
+			 }
+		 }else {//计算单牌
+			 int haveSelect=0;
+			 for(int week=14;week>0;week--){
+				if(haveSelect>4){
+					 break;
+				 }
+				 if(weekNum[week]!=null){
+					 pokerHand.getMaxPoint()[haveSelect++]=weekNum[week].get(0);
+				 }
+			 }
+			 pokerHand.setSingle(true);
+		 }
+		 //计算顺子
+		 if(pokerHand.isThree()||pokerHand.isTwoPair()||pokerHand.isPair()||pokerHand.isSingle()){
+			 TexasPokerHandPoint straightPokerHand = TexasUtils.findStraight(pokers);
+			 if(straightPokerHand.isStraight()){
+				 pokerHand.setStraight(true);
+				 for(int i=0;i<straightPokerHand.getMaxPoint().length;i++){
+					 pokerHand.getMaxPoint()[i]=straightPokerHand.getMaxPoint()[i];
+				 }
+			 }
+		 }
 		 
-		 //计算最大的顺子
-		 //计算三条
-		 
-		 //计算两对
-		 //计算一对
-		 //计算高牌
 		 
 		 return pokerHand;
 	}
