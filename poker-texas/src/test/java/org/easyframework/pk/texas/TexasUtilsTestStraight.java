@@ -11,55 +11,34 @@ import org.junit.Test;
  * @date 2017年7月3日 下午10:40:53
  */
 public class TexasUtilsTestStraight {
+	
+	public void testStraight1(){
+		int[] testPokers={8,3,7,1,2,3,3,0,4,0,1,3,5,3};
+		int[] expectedPokers={8,3,2,3,3,0,4,0,5,3};
+		Assert.assertTrue("带ACE顺子测试错误", TexasPokerHand4TestUtils.createPokerHandIsExpecteds(testPokers, expectedPokers));
+	}
 
-	@Test
+	//@Test
 	public void testStraightNotAce(){
-		
-		TexasPokerHand poker=new TexasPokerHand();
-		PokerCard[] priPokers={new PokerCard(9,3),new PokerCard(7,1)};
-		poker.addPriPokers(priPokers);
-		PokerCard[] flopPokers={new PokerCard(2,3),new PokerCard(8,0),new PokerCard(10,0)};
-		poker.addFlop(flopPokers);
-		poker.addTurn(new PokerCard(11,3));
-		poker.addRiver(new PokerCard(5,3));
-		
-		TexasPokerHandPoint newPoker=TexasUtils.findStraight(poker.getPokers());
-		Assert.assertNotNull(newPoker);
-		//int[] exp={0,2,3,4,6};
-		//Assert.assertArrayEquals(exp, newPoker.getMaxPoint());
-		
-		
+		int[] testPokers={9,3,7,1,2,3,8,0,10,0,11,3,5,3};
+		int[] expectedPokers={8,0,9,3,7,1,10,0,11,3};
+		Assert.assertTrue("不带ACE顺子测试错误", TexasPokerHand4TestUtils.createPokerHandIsExpecteds(testPokers, expectedPokers));
+	
 	}
 	@Test
 	public void testStraightHaveAce(){
-		
-		TexasPokerHand poker=new TexasPokerHand();
-		PokerCard[] priPokers={new PokerCard(1,3),new PokerCard(7,1)};
-		poker.addPriPokers(priPokers);
-		PokerCard[] flopPokers={new PokerCard(2,3),new PokerCard(3,0),new PokerCard(4,0)};
-		poker.addFlop(flopPokers);
-		poker.addTurn(new PokerCard(1,3));
-		poker.addRiver(new PokerCard(5,3));
-		
-		TexasPokerHandPoint newPoker=TexasUtils.findStraight(poker.getPokers());
-		Assert.assertNotNull(newPoker);
-		//int[] exp={0,2,3,4,6};
-		//Assert.assertArrayEquals(exp, newPoker.getMaxPoint());
-		Assert.assertTrue(62==newPoker.getWeight());
-		
-		
+		int[] testPokers={1,3,7,1,2,3,3,0,4,0,1,3,5,3};
+		int[] expectedPokers={1,3,2,3,3,0,4,0,5,3};
+		Assert.assertTrue("带ACE顺子测试错误", TexasPokerHand4TestUtils.createPokerHandIsExpecteds(testPokers, expectedPokers));
+	
 	}
 	@Test
 	public void testStraightNull(){
 		
-		TexasPokerHand poker=new TexasPokerHand();
-		PokerCard[] priPokers={new PokerCard(1,3),new PokerCard(2,1)};
-		poker.addPriPokers(priPokers);
-		PokerCard[] flopPokers={new PokerCard(1,3),new PokerCard(2,0),new PokerCard(2,0)};
-		poker.addFlop(flopPokers);
-		poker.addTurn(new PokerCard(1,3));
-		poker.addRiver(new PokerCard(1,3));
-		Assert.assertNull(TexasUtils.findStraight(poker.getPokers()));
+		int[] testPokers={1,2,2,1,1,3,2,0,2,0,1,3,1,3};
+		TexasPokerHand pk=TexasPokerHandFactory.createByNumArray(testPokers);
+		Assert.assertFalse("顺子应该为空", pk.isStraight());
+	
 		
 	}
 	

@@ -25,11 +25,13 @@ public class TexasUtils {
 		return pokers;
 	}
 	/**
-	 * 查找同花色pokers中的顺子，ace,2，3，4，5最小，10,11,12,13,ace最大
+	 * 查找<b>*同花色*</b>pokers中的顺子，ace,2，3，4，5顺子最小，10,11,12,13,ace顺子最大
+	 * <br>如无顺子，则反回最大点数的组合。
+	 * <br><b>注意:当不是同花，不是顺子时，不能用些方法反回最大牌型。
 	 * @param pokers  
-	 * @return  组成最大顺子的牌所在位置，及顺子值。如果无顺子则反回空
+	 * @return  TexasPokerHandPoint 组成最大顺子的牌所在位置，及顺子值。否则反回TexasPokerHandPoint.isStraight=false;
 	 */
-	public static TexasPokerHandPoint findStraight(PokerCard[] pokers){
+	private static TexasPokerHandPoint findStraight(PokerCard[] pokers){
 		//TODO pokers 里不能有空值
 		if(pokers!=null&&pokers.length>=5){
 			TexasPokerHandPoint p = new TexasPokerHandPoint();
@@ -52,14 +54,16 @@ public class TexasUtils {
 				//FIXME 会漏先同样点数，但不同花色的牌。如 4、方块5、红桃5、黑桃5、6、7、8，红桃5、黑桃5会漏选。但算法中先判断花色，再判断顺子时，不影响结果。
 				//记录选取的是那些牌，
 				int selectIndex=0;
+				int straightValues=p.getWeight();
 				for(int i=0;i<pokers.length;i++){
 					int week=pokers[i].getWeek();
 					int weekValue=1<<week;
 					if(week==PokerCard.WEEK_ACE){
 						weekValue=weekValue|1<<14;
 					}
-					if((weekValue&p.getWeight())>0){
+					if((weekValue&straightValues)>0){
 						p.getMaxPoint()[selectIndex++]=i;
+						straightValues=straightValues&(~weekValue);//会选取重复值，选择后的点数不再选择
 					}
 				}
 				return p;
@@ -97,25 +101,17 @@ public class TexasUtils {
 	 * @param pokerHand
 	 */
 	public static TexasPokerHand countValue(TexasPokerHand pokerHand){
-		 //PokerCard[] maxCard=new PokerCard[5];
-		 //List<Integer> theSameWeekCardPoint;
 		 PokerCard[] pokers=pokerHand.getPokers();
-		 
-		 //int[] maxPoint={-1,-1,-1,-1,-1};
-		 
 		 List<Integer>[] weekNum=new LinkedList[15];
-		 
 		 List<Integer>[] sessionNum=new LinkedList[4];
-		 long weekValues=0;
 		 
-		// int maxSameWeek=0;
-		 //int secondSameWeek=0;
-		 int maxSameWeeNum=0;//最大相同张数 1-4
+		 long weekValues=0;// 记录是否存在的点数牌
+		 
+		 int maxSameWeeNum=1;//最大相同张数 1-4
 		 int maxSameSessionNum=0;//最多花色的数量
 		 int maxSession=-1;//最多的花色
-		 //int maxWeek=0;//最大点数 ACE 14点最大
-		 //int 
-		 for(int i=0;i<pokers.length;i++){
+
+		 for(int i=0;i<pokerHand.getCardsNum();i++){
 			 //记录算点数及顺子
 			 int weekValue=0;
 			 int week=pokers[i].getWeek();
@@ -126,15 +122,15 @@ public class TexasUtils {
 				 weekValue=(1<<week);
 			 }
 			 
+			 if(weekNum[week]==null){
+				 weekNum[week]=new LinkedList<Integer>();
+			 }
+			 weekNum[week].add(i);
+			 //双
 			 if((weekValues&(~weekValue))>0){
-				 if(weekNum[pokers[i].getWeek()]==null){
-					 weekNum[pokers[i].getWeek()]=new LinkedList<Integer>();
-				 }
-				 weekNum[pokers[i].getWeek()].add(i);
-				 //weekNum[pokers[i].getWeek()]=weekNum[pokers[i].getWeek()]+1;
 				 //记录最高有几张相同
-				 if(weekNum[pokers[i].getWeek()].size()>maxSameWeeNum){
-					 maxSameWeeNum=weekNum[pokers[i].getWeek()].size();
+				 if(weekNum[week].size()>maxSameWeeNum){
+					 maxSameWeeNum=weekNum[week].size();
 				 }
 			 }
 			 //保存记录
@@ -169,6 +165,7 @@ public class TexasUtils {
 			 for(int i=0;i<flushPokes.length;i++){
 				 flushPokes[i]=pokers[flushPokesList.get(i)];
 			 }
+			 
 			 TexasPokerHandPoint maxFlushHandPoint=findStraight(flushPokes);
 			 //坐标的转换
 			 int selectPoint=0;
@@ -201,6 +198,7 @@ public class TexasUtils {
 			 for(int week=14;week>0;week--){
 				 if(weekNum[week]!=null){
 					 pokerHand.getMaxPoint()[haveSelect++]=weekNum[week].get(0);
+					 break;
 				 }
 			 }
 			 
@@ -266,7 +264,7 @@ public class TexasUtils {
 					 }
 					 weekNum[week]=null;
 				 }
-				 if(haveSelect>4){
+				 if(haveSelect>3){//选两对后跳出，最后一条只选最大点数的
 						break;
 				 }
 			 }
@@ -292,7 +290,7 @@ public class TexasUtils {
 		 }
 		 //计算顺子
 		 if(pokerHand.isThree()||pokerHand.isTwoPair()||pokerHand.isPair()||pokerHand.isSingle()){
-			 TexasPokerHandPoint straightPokerHand = TexasUtils.findStraight(pokers);
+			 TexasPokerHandPoint straightPokerHand = TexasUtils.findStraight(pokerHand.getUnNullPokers());
 			 if(straightPokerHand.isStraight()){
 				 pokerHand.setStraight(true);
 				 for(int i=0;i<straightPokerHand.getMaxPoint().length;i++){

@@ -17,6 +17,13 @@ public class TexasPokerHand extends TexasPokerHandPoint{
 	private PokerCard[] pokers=new PokerCard[7];
 	
 	
+	public PokerCard[] getUnNullPokers(){
+		PokerCard[] unNullPokers=new PokerCard[this.cardsNum];
+		for(int i=0;i<unNullPokers.length;i++){
+			unNullPokers[i]=this.pokers[i];
+		}
+		return unNullPokers;
+	}
 	
 	public PokerCard[] getPokers(){
 		return this.pokers;
