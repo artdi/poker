@@ -26,14 +26,17 @@ public class TexasPokerHandPoint {
 	 * 一对＝一对权重＋一对点数＋最大点数＋最大点数＋最大点数  ＊
 	 * 高牌＝最大点数＋最大点数＋最大点数＋最大点数＋最大点数  ＊
 	 */
-	//private final static long hightPointWeight=0x1;
-	private final static long pairWeight=0x1<<32;
-	private final static long threeWeight=0x1<<48;
-	private final static long straightWeight=0x1<<49;
-	private final static long flushWeight=0x1<<50;
-	private final static long fullHouseWeight=0x1<<51;
-	private final static long fourWeight=0x1<<52;
-	private final static long flushStraightWeight=0x1<<53;
+	
+	public final static int PAIR_WEIGHT_BASE_POINT=32;
+	
+	public final static long pairWeight=1l<<32;
+	public final static long towPairWeight=1l<<47;
+	public final static long threeWeight=1l<<48;
+	public final static long straightWeight=1l<<49;
+	public final static long flushWeight=1l<<50;
+	public final static long fullHouseWeight=1l<<51;
+	public final static long fourWeight=1l<<52;
+	public final static long flushStraightWeight=1l<<53;
 	
 	public final static int MINI_STRAIGHT_WEIGHT=62;//0b111110=62; 表示最小顺子
 	
@@ -47,12 +50,11 @@ public class TexasPokerHandPoint {
 	private boolean isPair=false;
 	private boolean isSingle=false;
 	
-	
+	private long value=0;
 	private int weight=0;
 	private int[] maxPoint={-1,-1,-1,-1,-1};
 	
 	public int[] getMaxPoint() {
-		long a=Long.MAX_VALUE;
 		return maxPoint;
 	}
 
@@ -135,6 +137,14 @@ public class TexasPokerHandPoint {
 
 	public void setFullHouse(boolean isFullHouse) {
 		this.isFullHouse = isFullHouse;
+	}
+
+	public long getValue() {
+		return value;
+	}
+
+	public void setValue(long value) {
+		this.value = value;
 	}
 
 

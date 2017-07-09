@@ -1,5 +1,8 @@
 package org.easyframework.pk.texas;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.easyframework.pk.PokerCard;
 import org.easyframework.pk.texas.exception.TexasException;
 
@@ -16,7 +19,10 @@ public class TexasPokerHand extends TexasPokerHandPoint{
 	
 	private PokerCard[] pokers=new PokerCard[7];
 	
-	
+	/**
+	 * 返回前几张非空的牌
+	 * @return
+	 */
 	public PokerCard[] getUnNullPokers(){
 		PokerCard[] unNullPokers=new PokerCard[this.cardsNum];
 		for(int i=0;i<unNullPokers.length;i++){
@@ -25,6 +31,19 @@ public class TexasPokerHand extends TexasPokerHandPoint{
 		return unNullPokers;
 	}
 	
+	public PokerCard[] getMaxPokers(){
+		PokerCard[] maxPokers=new PokerCard[5];
+		for(int i=0;i<5;i++){
+			int index=this.getMaxPoint()[i];
+			if(index>=0){
+				maxPokers[i]=this.pokers[index];
+			}else{
+				break;
+			}
+		}
+		
+		return  maxPokers;
+	}
 	public PokerCard[] getPokers(){
 		return this.pokers;
 	}

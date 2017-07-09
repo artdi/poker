@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.easyframework.pk.PokerCard;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 德州扑克工具
@@ -13,7 +15,7 @@ import org.easyframework.pk.PokerCard;
  * @date 2017年7月2日 下午6:06:05
  */
 public class TexasUtils {
-	
+	private static Logger log=LoggerFactory.getLogger(TexasUtils.class);
 
 	/**
 	 * 对扑克牌由大到小排序,ace最大
@@ -126,13 +128,12 @@ public class TexasUtils {
 				 weekNum[week]=new LinkedList<Integer>();
 			 }
 			 weekNum[week].add(i);
-			 //双
-			 if((weekValues&(~weekValue))>0){
-				 //记录最高有几张相同
-				 if(weekNum[week].size()>maxSameWeeNum){
-					 maxSameWeeNum=weekNum[week].size();
-				 }
-			 }
+			 
+			//记录最高有几张相同
+			if(weekNum[week].size()>maxSameWeeNum){
+				maxSameWeeNum=weekNum[week].size();
+			}
+			
 			 //保存记录
 			 weekValues=weekValues|weekValue;
 			 //记录花色
@@ -177,11 +178,19 @@ public class TexasUtils {
 					 }
 				 }
 			 }
+			//count flush Value
+			 long baseValue=0;
 			 if(maxFlushHandPoint.isStraight()){
 				 pokerHand.setFlushStraight(true);
+				 baseValue=TexasPokerHandPoint.flushStraightWeight;
 			 }else{
 				 pokerHand.setFlush(true);
+				 baseValue=TexasPokerHandPoint.flushWeight;
 			 }
+			 int weight=maxFlushHandPoint.getWeight();
+			 
+			 pokerHand.setValue(baseValue|weight);
+			 
 		 }else if(maxSameWeeNum==4){//计算四条
 			 pokerHand.setFour(true);
 			 int haveSelect=0;
@@ -192,6 +201,8 @@ public class TexasUtils {
 						pokerHand.getMaxPoint()[haveSelect++]=p;
 					 }
 					 weekNum[week]=null;
+					 //count four kind Value
+					 pokerHand.setValue(TexasPokerHandPoint.fourWeight|week);
 				 }
 			 }
 			 //选择另一条最大的 
@@ -203,8 +214,9 @@ public class TexasUtils {
 			 }
 			 
 		 }else if(maxSameWeeNum==3){//计算葫芦 或三条
-			 //pokerHand.setFour(true);
+			 
 			 int haveSelect=0;
+			 int threeWeek=0;
 			 //选择三条
 			 for(int week=14;week>0;week--){
 				 if(weekNum[week]!=null&&weekNum[week].size()==3){
@@ -216,6 +228,7 @@ public class TexasUtils {
 						pokerHand.getMaxPoint()[haveSelect++]=p;
 					 }
 					 weekNum[week]=null;
+					 threeWeek=week;
 				 }
 				 if(haveSelect>4){
 						break;
@@ -232,6 +245,8 @@ public class TexasUtils {
 					 }
 					 weekNum[week]=null;
 					 pokerHand.setFullHouse(true);
+					 //count fullhouse value
+					 pokerHand.setValue(TexasPokerHandPoint.fullHouseWeight|threeWeek);
 				 }
 			 }
 			 //如果不是葫芦，选择另两条最大的单牌 
@@ -245,9 +260,12 @@ public class TexasUtils {
 					 }
 				 }
 				 pokerHand.setThree(true);
+				//count three value
+				 pokerHand.setValue(TexasPokerHandPoint.threeWeight|threeWeek);
 			 }
 		 }else if(maxSameWeeNum==2){  //计算对子
 			 int haveSelect=0;
+			 long pairValue=0;
 			 //选择两条
 			 for(int week=14;week>0;week--){
 				 if(weekNum[week]!=null&&weekNum[week].size()==2){
@@ -263,6 +281,8 @@ public class TexasUtils {
 						pokerHand.getMaxPoint()[haveSelect++]=p;
 					 }
 					 weekNum[week]=null;
+					 //count pair value
+					 pairValue=pairValue|(1L<<(week+TexasPokerHandPoint.PAIR_WEIGHT_BASE_POINT));
 				 }
 				 if(haveSelect>3){//选两对后跳出，最后一条只选最大点数的
 						break;
@@ -274,8 +294,14 @@ public class TexasUtils {
 				 }
 				 if(weekNum[week]!=null){
 					 pokerHand.getMaxPoint()[haveSelect++]=weekNum[week].get(0);
+					 //单牌只记录点数
+					 pairValue=pairValue|week;
 				 }
 			 }
+			 if(pokerHand.isTwoPair()){
+				 pairValue=pairValue|TexasPokerHandPoint.towPairWeight;
+			 }
+			 pokerHand.setValue(pairValue);
 		 }else {//计算单牌
 			 int haveSelect=0;
 			 for(int week=14;week>0;week--){
@@ -287,6 +313,8 @@ public class TexasUtils {
 				 }
 			 }
 			 pokerHand.setSingle(true);
+			 //单牌的值
+			 pokerHand.setValue(weekValues);
 		 }
 		 //计算顺子
 		 if(pokerHand.isThree()||pokerHand.isTwoPair()||pokerHand.isPair()||pokerHand.isSingle()){
@@ -296,6 +324,8 @@ public class TexasUtils {
 				 for(int i=0;i<straightPokerHand.getMaxPoint().length;i++){
 					 pokerHand.getMaxPoint()[i]=straightPokerHand.getMaxPoint()[i];
 				 }
+				 //count Straight value
+				 pokerHand.setValue(TexasPokerHandPoint.straightWeight|weekValues);
 			 }
 		 }
 		 
