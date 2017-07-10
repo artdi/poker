@@ -12,5 +12,7 @@ public class TexasCroupierBaseTest {
 			System.out.println(card.toString());
 		}
 		
+		
+		
 	}
 }

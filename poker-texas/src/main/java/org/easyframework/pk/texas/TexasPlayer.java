@@ -9,7 +9,7 @@ public class TexasPlayer {
     /**
      * 玩家游戏中的状态
      */
-	public  TexasPlayerStatic Status;
+	public  TexasPlayerStatus Status;
 	/**
 	 * 游戏中的筹码数
 	 */

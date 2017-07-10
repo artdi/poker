@@ -11,17 +11,18 @@ import org.easyframework.pk.texas.exception.TexasException;
 public interface ITexasCroupier {
 
 	/**
-	 * 获取状态序号，Croupier同一时间只充许一个操作时，如果StaticId不连继，表示操作有跳跃。
+	 * 获取命令序号，Croupier同一时间只充许一个操作时，如果CommandId不连继，表示操作有跳跃。
 	 * @return
 	 */
-	public int getStaticId();
+	public int getCommandId();
 	/**
 	 * 玩家坐下，成功返回Croupier最新状态
 	 * @param player
+	 * @param seatNo  坐那个位置，为空则随机
 	 * @return
 	 * @throws TexasException  玩家已满
 	 */
-	public ITexasCroupier sitDown(TexasPlayer player) throws TexasException;
+	public ITexasCroupier sitDown(TexasPlayer player,Integer seatNo) throws TexasException;
 	/**
 	 * 玩家增加筹码
 	 * @param player
