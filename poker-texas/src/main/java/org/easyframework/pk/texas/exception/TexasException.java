@@ -10,6 +10,7 @@ package org.easyframework.pk.texas.exception;
 public class TexasException extends RuntimeException {
 	private int code=0;
 	public TexasException(int code,String msg,Exception e){
-		
+		super(msg, e);
+		this.code=code;
 	}
 }
