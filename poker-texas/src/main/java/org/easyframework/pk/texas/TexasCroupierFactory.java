@@ -14,7 +14,7 @@ public class TexasCroupierFactory {
 	 * @param player
 	 * @return
 	 */
-	public ITexasCroupier createCroupier(TexasCroupierConfig config,TexasPlayer player){
+	public ITexasTable createCroupier(TexasCroupierConfig config,TexasPlayer player){
 		return null;
 	}
 	/**
@@ -23,7 +23,7 @@ public class TexasCroupierFactory {
 	 * @param player
 	 * @return
 	 */
-	public  ITexasCroupier playerSitDown(TexasCroupierConfig config,TexasPlayer player){
+	public  ITexasTable playerSitDown(TexasCroupierConfig config,TexasPlayer player){
 		return null;
 	}
 

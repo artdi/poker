@@ -38,7 +38,7 @@ public class HkTexasCroupier extends TexasCroupierBase implements ITexasCroupier
 	private String tableId=UUID.randomUUID().toString();
 	private List<TexasPlayer> viewers=new LinkedList<TexasPlayer>();
 	private TexasPlayer[] players=new TexasPlayer[config.getMaxPlayer()];
-	private TexasTableStatusName tableStatus=TexasTableStatusName.waitPlayer;
+	private TexasTableStatus tableStatus=TexasTableStatus.waitPlayer;
 	private Map<Long,List<TexasPlayer>> betMap=new HashMap<Long,List<TexasPlayer>>();
 	//庄家
 	private TexasPlayer dealer;
@@ -77,14 +77,14 @@ public class HkTexasCroupier extends TexasCroupierBase implements ITexasCroupier
 	
 	private void handlePlayerChange(){
 		playerNum=this.countEffectivePlayer(config.getBigBlinds());
-		if(TexasTableStatusName.waitPlayer==this.tableStatus&&playerNum>1){
+		if(TexasTableStatus.waitPlayer==this.tableStatus&&playerNum>1){
 			//start game
 			this.startGame();
-			this.tableStatus=TexasTableStatusName.waitBet;
-		}else if(TexasTableStatusName.waitBet==this.tableStatus&&playerNum<2){
+			this.tableStatus=TexasTableStatus.waitBet;
+		}else if(TexasTableStatus.waitBet==this.tableStatus&&playerNum<2){
 			//end game
 			this.endGame();
-			this.tableStatus=TexasTableStatusName.waitPlayer;
+			this.tableStatus=TexasTableStatus.waitPlayer;
 			this.handlePlayerChange();
 		}
 		
@@ -151,7 +151,7 @@ public class HkTexasCroupier extends TexasCroupierBase implements ITexasCroupier
 		TexasPlayer player=new TexasPlayer(playerId.getId());
 		player.setBankroll(playerId.getBankroll());
 		if(players[seatNo]==null||getPlayerSeatNo(player)==-1){
-			player.setStatus(TexasPlayerStatus.siting);
+			player.setStatus(TexasPlayerStatus.waitStart);
 			player.setSeated(true);
 			
 			try{
@@ -188,6 +188,7 @@ public class HkTexasCroupier extends TexasCroupierBase implements ITexasCroupier
 		if(seatNo!=-1&&players[seatNo]!=null){
 			this.players[seatNo].setStatus(TexasPlayerStatus.view);
 			this.players[seatNo].setSeated(false);
+			//TODO remove player from players
 			this.viewers.add(player);
 			handlePlayerChange();
 		}else{
@@ -253,7 +254,7 @@ public class HkTexasCroupier extends TexasCroupierBase implements ITexasCroupier
 
 	
 
-	public TexasTableStatusName getStatusName() {
+	public TexasTableStatus getStatusName() {
 		
 		return this.tableStatus;
 	}
@@ -290,6 +291,11 @@ public class HkTexasCroupier extends TexasCroupierBase implements ITexasCroupier
 
 	public TexasPlayer getBetPlayer() {
 		return this.waitingPlayer;
+	}
+
+	public void shuffle() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

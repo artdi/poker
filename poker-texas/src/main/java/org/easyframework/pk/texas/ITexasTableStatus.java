@@ -14,7 +14,7 @@ public interface ITexasTableStatus {
 	 * 桌面状态名称
 	 * @return
 	 */
-	public TexasTableStatusName getStatusName();
+	public TexasTableStatus getStatusName();
 	/**
 	 * 获取玩家数量
 	 * @return

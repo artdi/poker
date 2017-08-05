@@ -8,6 +8,9 @@ package org.easyframework.pk.texas.exception;
  * @date 2017年7月2日 下午5:21:53
  */
 public class TexasException extends RuntimeException {
+	
+	//public final static int ERROR_CODE
+	
 	private int code=0;
 	public TexasException(int code,String msg,Exception e){
 		super(msg, e);

@@ -1,6 +1,6 @@
 package org.easyframework.pk.texas;
 
-public enum TexasTableStatusName {
+public enum TexasTableStatus {
 	/**
 	 * 等待玩家坐下
 	 */
