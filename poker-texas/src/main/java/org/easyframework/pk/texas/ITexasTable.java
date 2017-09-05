@@ -8,7 +8,7 @@ import org.easyframework.pk.texas.exception.TexasException;
  * @author artdi artditan@gmail.com 
  * @date 2017年7月2日 下午5:15:50
  */
-public interface ITexasTable {
+public interface ITexasTable extends ITexasTableView{
 
 	
 	/**
@@ -43,6 +43,6 @@ public interface ITexasTable {
 	 * 返回ITexasTable的状态，不能编辑，用于展示用。多用于反回客户端展示
 	 * @return
 	 */
-	public ITexasTable view();
+	public ITexasTableView view();
 	
 }

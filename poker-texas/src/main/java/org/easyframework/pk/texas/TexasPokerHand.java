@@ -90,6 +90,24 @@ public class TexasPokerHand extends TexasPokerHandPoint{
 	public int getCardsNum() {
 		return cardsNum;
 	}
+
+	public void addPokers(PokerCard[] pokers) {
+		if(pokers==null){
+			throw new TexasException(101,"添加的牌不能为空",null);
+		}
+		for(PokerCard c:pokers){
+			if(c==null){
+				throw new TexasException(101,"添加的牌不能为空",null);
+			}
+		}
+		if(this.cardsNum+pokers.length>7){
+			throw new TexasException(101,"玩家当前已有"+this.cardsNum+"张牌，不能接收"+pokers.length+"张牌",null);
+		}
+		for(int i=0;i<pokers.length;i++){
+			this.pokers[this.cardsNum++]=pokers[i];
+		}
+		
+	}
 	
 
 }

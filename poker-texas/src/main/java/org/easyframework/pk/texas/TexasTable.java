@@ -52,7 +52,7 @@ public class TexasTable implements ITexasTable{
 	 * 2.清空玩家手里所有牌
 	 * 
 	 */
-	private void clearTableStatus(){
+	protected void clearTableStatus(){
 		for(int i=0;i<seats.length;i++){
 			seats[i].setGiveUp(false);
 		}
@@ -110,8 +110,8 @@ public class TexasTable implements ITexasTable{
 				//start game
 				try{
 					lock.lock();
-					
-					
+					clearTableStatus();
+					startGame();
 					this.status=TexasTableStatus.waitBet;
 				}finally{
 					lock.unlock();
@@ -124,7 +124,11 @@ public class TexasTable implements ITexasTable{
 		
 		return 2;
 	}
-	protected int betSmallBig(){
+	/**
+	 * 启动游戏
+	 * @return
+	 */
+	protected int startGame(){
 		return 1;
 	}
 	
@@ -134,10 +138,8 @@ public class TexasTable implements ITexasTable{
 	 */
 	protected int endGame() {
 		try{
-			//TODO 比较玩家牌，并分配奖金
-			
 			lock.lock();
-			
+			allot();
 			this.status=TexasTableStatus.waitPlayer;
 			clearTableStatus();
 		}finally{
@@ -145,7 +147,14 @@ public class TexasTable implements ITexasTable{
 		}
 		return 1;
 	}
-	private int getPlayerSeatNo(TexasPlayer player) {
+	/**
+	 * 分配奖金
+	 * @return
+	 */
+	protected int allot(){
+		return 1;
+	}
+	protected int getPlayerSeatNo(TexasPlayer player) {
 		for(int i=0;i<seats.length;i++){
 			if(seats[i].getPlayer()!=null&&seats[i].getPlayer().getId().equals(player.getId())){
 				return seats[i].getSeatNo();
@@ -161,7 +170,7 @@ public class TexasTable implements ITexasTable{
 		return result;
 	}
 	public int bet(TexasPlayer player, long betNum){
-		
+		//子类实现
 		return 0;
 	}
 	
@@ -187,26 +196,10 @@ public class TexasTable implements ITexasTable{
 		log.debug("玩家状态："+playerSb.toString());
 		StringBuilder betSb=new StringBuilder();
 		
-//		for(Long key:this.betMap.keySet()){
-//			betSb.append("奖池").append(key).append("[");
-//			for(TexasPlayer player:this.betMap.get(key)){
-//				betSb.append(player.getId()).append("、");
-//			}
-//			betSb.append("\n\r");
-//		}
 		log.debug("奖池状态：");
 		log.debug(betSb.toString());
 		
 		return this;
-	}
-	private int getPlayerNum() {
-		int playerNum=0;
-		for(int i=0;i<seats.length;i++){
-			if(seats[i].getPlayer()!=null){
-				playerNum++;
-			}
-		}
-		return playerNum;
 	}
 	
 	public int giveUp(TexasPlayer player) {
@@ -218,7 +211,7 @@ public class TexasTable implements ITexasTable{
 	 * @param leave  放弃后，是否离开桌面
 	 * @return
 	 */
-	public int giveUp(TexasPlayer player,boolean leave) {
+	private int giveUp(TexasPlayer player,boolean leave) {
 		int seatNo=getPlayerSeatNo(player);
 		if(seatNo==-1){
 			return -1;
@@ -243,7 +236,7 @@ public class TexasTable implements ITexasTable{
 		}
 	}
 	/**
-	 * 计算有效玩家数量
+	 * 计算有效玩家数量，游戏中，没放弃的玩家
 	 * @return
 	 */
 	private int countEffectivePlayer(){
@@ -277,6 +270,48 @@ public class TexasTable implements ITexasTable{
 		}
 		return takenNum;
 	}
+	
+	public TexasTableStatus getStatusName() {
+		return this.status;
+	}
+	public int getPlayerNum() {
+		int playerNum=0;
+		for(TexasSeat seat:seats){
+			if(seat.getPlayer()!=null){
+				playerNum++;
+			}
+		}
+		return playerNum;
+	}
+	public int getPlayerPokerNum() {
+		int pokerNum=0;
+		for(TexasSeat seat:seats){
+			if(seat.getPlayer()!=null&&!seat.isGiveUp()){
+				TexasPokerHand ph = seat.getPlayer().getPokerHand();
+				if(ph!=null){
+					pokerNum=ph.getCardsNum();
+				}
+			}
+		}
+		return pokerNum;
+	}
+	public int getPlayerPokerNum(int seatNo) {
+		int pokerNum=0;
+		TexasSeat seat=seats[seatNo];
+		if(seat!=null){
+			if(seat.getPlayer()!=null&&!seat.isGiveUp()){
+				TexasPokerHand ph = seat.getPlayer().getPokerHand();
+				if(ph!=null){
+					pokerNum=ph.getCardsNum();
+				}
+			}
+		}
+		return pokerNum;
+	}
+	public int getEffectivePlayer() {
+		return this.countEffectivePlayer();
+	}
+	
 	
 	
 }

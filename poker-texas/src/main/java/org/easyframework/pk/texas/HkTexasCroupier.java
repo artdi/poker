@@ -20,7 +20,8 @@ import org.easyframework.pk.texas.exception.TexasException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HkTexasCroupier extends TexasCroupierBase implements ITexasCroupier,ITexasTableStatus {
+@Deprecated
+public class HkTexasCroupier extends TexasCroupierBase implements ITexasCroupier {
 
 	private static final Logger log=LoggerFactory.getLogger(HkTexasCroupier.class);
 	private final ReentrantLock lock = new ReentrantLock();

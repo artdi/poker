@@ -8,7 +8,7 @@ import java.util.Map;
  * @author artdi artditan@gmail.com 
  * @date 2017年7月22日 下午4:11:40
  */
-public interface ITexasTableStatus {
+public interface ITexasTableView {
 
 	/**
 	 * 桌面状态名称
@@ -16,28 +16,24 @@ public interface ITexasTableStatus {
 	 */
 	public TexasTableStatus getStatusName();
 	/**
-	 * 获取玩家数量
+	 * 获取已坐在桌上的玩家数量
 	 * @return
 	 */
 	public int getPlayerNum();
 	/**
-	 * 获取各坐位的人，坐位无人则为空
-	 * @return  TexasPlayer[]
-	 */
-	public TexasPlayer[] getPlayers();
-	
-	public TexasPlayer getBetPlayer();
-	/**
-	 * 获取奖池，key为奖池奖金数，value为本奖池参与人
+	 * 获取游戏中的玩家手中牌数量
 	 * @return
 	 */
-	public Map<Long, List<TexasPlayer>> getBets();
+	public int getPlayerPokerNum();
 	/**
-	 * 获取参观人
+	 * 获取某坐位玩家手中牌数量
+	 * @param seatNo
 	 * @return
 	 */
-	public List<TexasPlayer> getViewer();
-	
-	
-	
+	public int getPlayerPokerNum(int seatNo);
+	/**
+	 * 游戏中，计算未结束玩家数量
+	 * @return
+	 */
+	public int getEffectivePlayer();
 }
