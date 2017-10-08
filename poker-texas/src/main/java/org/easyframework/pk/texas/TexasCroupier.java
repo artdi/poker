@@ -24,6 +24,7 @@ public class TexasCroupier extends TexasTable{
 	private int sendCardIndex=0;//第几轮发牌
 	private int sendCardIndexAdd=0;//第几轮加注，每轮发牌大盲可加注三次
 	private long sendCardIndexAddMax=0;//本轮加注最大金额
+	private int sendCardIndexAddMaxSeatNo=0;//本轮最大加注谁最先加
 	
 	private volatile int dealerSeatNo=0;
 	private volatile int betWatingNo;

@@ -15,6 +15,10 @@ import org.slf4j.LoggerFactory;
 
 public class TexasCroupierTest {
 	private static final Logger log=LoggerFactory.getLogger(TexasCroupierTest.class);
+	
+	/**
+	 * //TODO 测试下注后，是否正确发牌
+	 */
 	@Test
 	public void testBealing(){
 		ITexasTable table=new TexasCroupier(new TexasCroupierConfig(), new TexasCommandProcessor());
@@ -27,15 +31,15 @@ public class TexasCroupierTest {
 		player4.setBankroll(1500);
 		table.sitDown(player1, 1);
 		table.sitDown(player2, 2);
-		Assert.assertTrue("应该有2个玩家在玩",2==table.view().getEffectivePlayer());
-		Assert.assertTrue("游戏已开始",TexasTableStatus.waitBet==table.view().getStatusName());
 		table.sitDown(player4, 4);
-		Assert.assertTrue("应该有2个玩家在玩",2==table.view().getEffectivePlayer());
-		Assert.assertTrue("应该有三个玩家坐下",3==table.view().getPlayerNum());
-		Assert.assertEquals(2,table.giveUp(player1));
-		Assert.assertTrue("玩家2放弃，游戏重新开局",TexasTableStatus.waitBet==table.view().getStatusName());
+		table.giveUp(player1);//玩家1放弃，重新开始
 		Assert.assertTrue("应该有3个玩家在玩",3==table.view().getEffectivePlayer());
-		//log.debug("玩家2放弃，游戏重新开局");
+		//TODO 庄家是否正确
+		//table.view().ge
+		//TODO 小盲、大盲是否正确
+		//TODO 等待下注玩家是否正确
+		
+		
 		Assert.assertEquals(1,table.bet(player1, 10));//庄家
 		log.debug("玩家1下注成功");
 		Assert.assertEquals(1,table.bet(player2, 10));//小盲
