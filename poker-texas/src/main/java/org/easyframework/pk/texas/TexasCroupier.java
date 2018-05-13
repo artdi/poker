@@ -1,6 +1,10 @@
 package org.easyframework.pk.texas;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -21,21 +25,29 @@ public class TexasCroupier extends TexasTable{
 	private int currentPokerIndex=0;
 	
 	private static final int[] SendCardNum={2,3,1,1};
-	private int sendCardIndex=0;//第几轮发牌
+	private volatile int sendCardIndex=0;//第几轮发牌
 	private int sendCardIndexAdd=0;//第几轮加注，每轮发牌大盲可加注三次
 	private long sendCardIndexAddMax=0;//本轮加注最大金额
 	private int sendCardIndexAddMaxSeatNo=0;//本轮最大加注谁最先加
 	
 	private volatile int dealerSeatNo=0;
 	private volatile int betWatingNo;
+	private volatile long gameId=0;
 	
-	private volatile Map<String,Long> betRecord;
-	
+	//private volatile Map<String,Long> betRecord;
+	protected Jackpot jackpot;
+	private int CAP=this.config.getCap();
 	
 	public TexasCroupier(TexasCroupierConfig config,
 			ICommandProcessor cmdProcessor) {
 		super(config, cmdProcessor);
+		this.jackpot=new Jackpot(config.getMaxPlayer());
 	}
+	/**
+	 * 启动游戏
+	 * <br>
+	 * 庄家计算方式：坐位0玩家后第一个有效玩家，庄家后面为小盲
+	 */
 	@Override
 	protected int startGame() {
 		//find next Dealer
@@ -44,12 +56,13 @@ public class TexasCroupier extends TexasTable{
 		this.betWatingNo = nextEffectivePlayer(dealerSeatNo);
 		this.bet(seats[betWatingNo].getPlayer(), config.getSmallBlinds());
 		// 大盲注
-		this.betWatingNo = nextEffectivePlayer(betWatingNo);
+		//this.betWatingNo = nextEffectivePlayer(betWatingNo);
 		this.bet(seats[betWatingNo].getPlayer(), config.getBigBlinds());
 		
 		this.dealing();
-		// 下一玩家
-		this.betWatingNo = nextEffectivePlayer(betWatingNo);
+		// 等待下一玩家
+		//this.betWatingNo = nextEffectivePlayer(betWatingNo);
+		this.gameId++;
 		return 1;
 	}
 	@Override
@@ -65,7 +78,8 @@ public class TexasCroupier extends TexasTable{
 		sendCardIndex=0;
 		sendCardIndexAdd=0;
 		sendCardIndexAddMax=0;
-		this.betRecord=new HashMap();
+		//this.betRecord=new HashMap();
+		this.jackpot.initBetRecord();
 		
 		
 	}
@@ -147,35 +161,51 @@ public class TexasCroupier extends TexasTable{
 	 * 计算押注奖池情况
 	 */
 	@Override
-	protected int allot() {
-		return 0;
-	}
-	/**
-	 * 玩家奖金放入奖池
-	 * @param player
-	 * @param betNum
-	 * @return 1:跟注，2:加注，3:ALLIN跟注，-1:押注不符合规则
-	 */
-	private int addBet(TexasPlayer player, long betNum){
-		long playerBeted=0;
-		if(betRecord.containsKey(player.getId())){
-			playerBeted=betRecord.get(player.getId());
+	protected void allot() {
+		//  获取有效玩家排名
+		int[] effSeatNos=this.getEffectivePlayerSeatNo();
+		TexasSeat[] effSeats=new TexasSeat[effSeatNos.length];
+		for(int i=0;i<effSeatNos.length;i++){
+			effSeats[i]=this.seats[effSeatNos[i]];
+			effSeats[i].getPlayer().setPokerHand(TexasUtils.countValue(effSeats[i].getPlayer().getPokerHand()));
 		}
-		playerBeted=playerBeted+betNum;
-		betRecord.put(player.getId(), playerBeted);
+		Arrays.sort(effSeats, new Comparator<TexasSeat>(){
+
+			public int compare(TexasSeat o1, TexasSeat o2) {
+				if(o1.getPlayer().getPokerHand().getValue()>o2.getPlayer().getPokerHand().getValue()){
+					return 1;
+				}else if(o1.getPlayer().getPokerHand().getValue()==o2.getPlayer().getPokerHand().getValue()){
+					return 0;
+				}else{
+					return -1;
+				}
+			}
+		});
 		
-		if(betNum>this.sendCardIndexAddMax){
-			this.sendCardIndexAddMax=betNum;
-			this.sendCardIndexAdd++;
-			return 2;
+		int[] orders=new int[this.seats.length];
+		for(int i=0;i<orders.length;i++){
+			orders[i]=0;
 		}
-		if(betNum==player.getBankroll()){
-			return 3;
+		int currentOrder=1;
+		for(int i=0;i<effSeats.length;i++){
+			orders[effSeats[i].getSeatNo()]=currentOrder;
+			if((i+1)<effSeats.length){
+				if(effSeats[i+1].getPlayer().getPokerHand().getValue()!=effSeats[i].getPlayer().getPokerHand().getValue()){
+					currentOrder++;
+				}
+			}
 		}
 		
-		return 1;
+		// 对不同排名玩家分配奖金  
+		long[] allocat=this.jackpot.allocation(orders);
+		for(int i=0;i<allocat.length;i++){
+			if(allocat[i]!=0){
+				this.seats[i].getPlayer().setBankroll(this.seats[i].getPlayer().getBankroll()+allocat[i]);
+			}
+			
+		}
+		//TODO 测试本方法
 	}
-	
 	
 	@Override
 	public int bet(TexasPlayer player, long betNum) {
@@ -191,30 +221,24 @@ public class TexasCroupier extends TexasTable{
 		if(p.getBankroll()<betNum){
 			return -2;
 		}
-		int addResult=this.addBet(p, betNum);
-		boolean needDealing=false;
-		this.betWatingNo = nextEffectivePlayer(betWatingNo);
-		//大盲继续加注，不发牌，下一玩家继续选择。
-		//大盲不再加注，发牌未结束，则先发牌，继续下一玩家选择。
-		//大盲不再加注，发牌已结束，则结束游戏
-		if(this.isBigPlayer(seatNo)&&addResult==1){//大盲操作
-			needDealing=true;
-		}else{//普通玩家操作
-			//下一玩家是大盲，已经是最后一轮加注，则要发牌
-			if(this.isBigPlayer(this.betWatingNo)&&this.sendCardIndexAdd==2){
-				needDealing=true;
-			}
-		}
 		
-		if(needDealing){
-			if(this.isLastDealing()){
-				this.endGame();
-				this.tryStartGame();
-				return 2;
-			}else{
-				
-				this.dealing();
-				
+		jackpot.addBet(seatNo, this.sendCardIndex, betNum);
+		p.setBankroll(p.getBankroll()-betNum);
+		this.betWatingNo = nextEffectivePlayer(betWatingNo);
+		//最大押注人继续加注，不发牌，下一玩家继续选择。
+		//最大押注人已加注达3次，发牌未结束，则先发牌，继续下一玩家选择。
+		//最大押注人已加注达3次，发牌已结束，则结束游戏
+		int maxBetSeatNo=this.jackpot.getMaxBetSeatNo(sendCardIndex, this.getEffectivePlayerSeatNo());
+		//下一玩家为最大下注玩家
+		if(maxBetSeatNo==this.betWatingNo){
+			if(this.jackpot.getAddBetNum(maxBetSeatNo, this.sendCardIndex)==CAP){//已下注三次
+				if(this.isLastDealing()){
+					this.endGame();
+					this.tryStartGame();
+					return 2;
+				}else{
+					this.dealing();
+				}
 			}
 		}
 		
@@ -253,7 +277,36 @@ public class TexasCroupier extends TexasTable{
 		}
 		return -1;
 	}
+	/**
+	 * 获取有效玩家的坐位号
+	 * @return [0,4,5]零号玩家、4号、5号玩家为有效玩家
+	 */
+	private int[] getEffectivePlayerSeatNo(){
+		
+		List<Integer> ls=new LinkedList();
+		for(TexasSeat seat:seats){
+			if(seat.getPlayer()!=null&&!seat.isGiveUp()){
+				ls.add(seat.getSeatNo());
+			}
+		}
+		int[] seatNo=new int[ls.size()];
+		for(int i=0;i<seatNo.length;i++){
+			seatNo[i]=ls.get(i);
+		}
+		return seatNo;
+	}
 	
-	
+	protected int getBetWatingNo(){
+		return this.betWatingNo;
+	}
+	protected int getDealerSeatNo(){
+		return this.dealerSeatNo;
+	}
+	protected int getSendCardIndex(){
+		return this.sendCardIndex;
+	}
+	protected long getGameId(){
+		return this.gameId;
+	}
 
 }

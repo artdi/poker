@@ -198,6 +198,19 @@ public class Jackpot  {
 		return bets;
 	}
 	/**
+	 * 获取各玩家本轮的下注额
+	 * @param sendCardIndex 第几轮发牌
+	 * @return @return [70,0,20,10,0,60] 表示坐号0玩家押注70,坐号1押注0 。。。
+	 */
+	protected long[] getBets(int sendCardIndex){
+		long[] bets=new long[this.betRecords.length];
+		
+		for(int i=0;i<this.betRecords.length;i++){
+			bets[i]=this.betRecords[i][sendCardIndex];
+		}
+		return bets;
+	}
+	/**
 	 * 把用户下注额，坐位号，牌型大小排名放置到BetSeatNoAndOrder链表中。
 	 * @param orders [0,1,1,3,2,0] 表示坐号0玩家放弃了，坐号1、2玩家并列第一名，坐号3玩家第3名，坐号4玩家放弃。
 	 * @return

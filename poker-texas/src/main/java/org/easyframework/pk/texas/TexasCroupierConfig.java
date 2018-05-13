@@ -44,13 +44,14 @@ public class TexasCroupierConfig {
 	}
 	public void setSmallBlinds(long smallBlinds) {
 		this.smallBlinds = smallBlinds;
+		this.bigBlinds=this.smallBlinds*2;
 	}
 	public long getBigBlinds() {
 		return bigBlinds;
 	}
-	public void setBigBlinds(long bigBlinds) {
+	/*public void setBigBlinds(long bigBlinds) {
 		this.bigBlinds = bigBlinds;
-	}
+	}*/
 	
 
 	

@@ -319,7 +319,7 @@ public class TexasUtils {
 		 //计算顺子
 		 if(pokerHand.isThree()||pokerHand.isTwoPair()||pokerHand.isPair()||pokerHand.isSingle()){
 			 TexasPokerHandPoint straightPokerHand = TexasUtils.findStraight(pokerHand.getUnNullPokers());
-			 if(straightPokerHand.isStraight()){
+			 if(straightPokerHand!=null&&straightPokerHand.isStraight()){
 				 pokerHand.setStraight(true);
 				 for(int i=0;i<straightPokerHand.getMaxPoint().length;i++){
 					 pokerHand.getMaxPoint()[i]=straightPokerHand.getMaxPoint()[i];

@@ -151,8 +151,9 @@ public class TexasTable implements ITexasTable{
 	 * 分配奖金
 	 * @return
 	 */
-	protected int allot(){
-		return 1;
+	protected void allot(){
+		
+		//TODO  工金子
 	}
 	protected int getPlayerSeatNo(TexasPlayer player) {
 		for(int i=0;i<seats.length;i++){
