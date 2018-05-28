@@ -71,6 +71,12 @@ public class TexasTableView implements ITexasTableView {
 	public long getGameId(){
 		return this.table.getGameId();
 	}
+	public long getSendCardIndex(){
+		return this.table.getSendCardIndex();
+	}
+	public int getDealerSeatNo(){
+		return this.table.getDealerSeatNo();
+	}
 	
 
 }

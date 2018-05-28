@@ -19,7 +19,7 @@ public class TexasTable implements ITexasTable{
 	
 	public final static Logger log=LoggerFactory.getLogger(TexasTable.class);
 	
-	private final ReentrantLock lock = new ReentrantLock();
+	protected final ReentrantLock lock = new ReentrantLock();
 	protected TexasCroupierConfig config;
 	
 	private ICommandProcessor cmdProcessor;
@@ -210,7 +210,7 @@ public class TexasTable implements ITexasTable{
 	 * 玩家放弃游戏
 	 * @param player 玩家
 	 * @param leave  放弃后，是否离开桌面
-	 * @return
+	 * @return 1:游戏继续，2：本局结束，-1:玩家不在桌面上
 	 */
 	private int giveUp(TexasPlayer player,boolean leave) {
 		int seatNo=getPlayerSeatNo(player);
@@ -233,8 +233,15 @@ public class TexasTable implements ITexasTable{
 			
 			return 2;
 		}else{
+			this.flashWatingPlayer(seatNo);
 			return 1;
 		}
+	}
+	/**
+	 * 决策权轮转到下一玩家
+	 */
+	protected void flashWatingPlayer(int seatNo) {
+		
 	}
 	/**
 	 * 计算有效玩家数量，游戏中，没放弃的玩家

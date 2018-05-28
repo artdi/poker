@@ -18,61 +18,230 @@ import  org.easyframework.pk.texas.JackpotTest.*;
 
 public class TexasCroupierTest {
 	private static final Logger log=LoggerFactory.getLogger(TexasCroupierTest.class);
-	
 	/**
-	 * //TODO 测试下注后，是否正确发牌
+	 * 测试奖金分配是否正确
 	 */
-	//@Test
-	public void testBealing(){
-		ITexasTable table=new TexasCroupier(new TexasCroupierConfig(), new TexasCommandProcessor());
+	public void testAllot(){
+		
+	}
+	/**
+	 * 测试局id转换是否正确
+	 */
+	@Test
+	public void testGameId(){
+		TexasCroupierConfig config=new TexasCroupierConfig();
+		config.setSmallBlinds(5);
+		TexasCroupier table=new TexasCroupier(config, new TexasCommandProcessor());
 	
 		TexasPlayer player1=new TexasPlayer("P1");
 		player1.setBankroll(1000);
 		TexasPlayer player2=new TexasPlayer("P2");
 		player2.setBankroll(1000);
 		TexasPlayer player4=new TexasPlayer("P4");
-		player4.setBankroll(1500);
+		player4.setBankroll(1000);
+		
 		table.sitDown(player1, 1);
 		table.sitDown(player2, 2);
+		TexasTableView view=new TexasTableView(table);
+		Assert.assertEquals("当前应为第一局",1,view.getGameId());
+		table.sitDown(player4, 4);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为第一局",1,view.getGameId());
+		
+		table.giveUp(player1);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为第二局",2,view.getGameId());
+		table.giveUp(player1);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为第二局",2,view.getGameId());
+		table.giveUp(player1);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为第二局",2,view.getGameId());
+		table.giveUp(player4);
+		view=new TexasTableView(table);
+		Assert.assertEquals("玩家1,4,均放弃，游戏结束，开始第三局",3,view.getGameId());
+		
+		table.standUp(player4);
+		table.giveUp(player2);
+		view=new TexasTableView(table);
+		Assert.assertEquals("玩家4离开,2放弃，游戏结束，开始第四局",4,view.getGameId());
+		
+		table.standUp(player2);
+		view=new TexasTableView(table);
+		Assert.assertEquals("玩家2离开,游戏结束，等待第五局开始",4,view.getGameId());
+		
+		table.sitDown(player4, 3);
+		view=new TexasTableView(table);
+		Assert.assertEquals("玩家4进入,第五局开始",5,view.getGameId());
+		
+	}
+	/**
+	 * 测试发牌轮转是否正确
+	 */
+	@Test
+	public void testSendCardIndex(){
+		TexasCroupierConfig config=new TexasCroupierConfig();
+		config.setSmallBlinds(5);
+		TexasCroupier table=new TexasCroupier(config, new TexasCommandProcessor());
+		
+		TexasPlayer player1=new TexasPlayer("P1");
+		player1.setBankroll(1000);
+		TexasPlayer player2=new TexasPlayer("P2");
+		player2.setBankroll(1000);
+		TexasPlayer player4=new TexasPlayer("P4");
+		player4.setBankroll(1000);
+		TexasPlayer player5=new TexasPlayer("P5");
+		player5.setBankroll(1000);
+		table.sitDown(player1, 1);//庄，大盲
+		table.sitDown(player2, 2);//小盲，
+		table.sitDown(player4, 4);//等待
+		table.sitDown(player5, 5);//等待
+		
+		table.giveUp(player2);
+		/*
+		 * //TODO 测试发牌轮
+		 * 重新开始，
+		 *      庄    小盲  大盲
+		 * 玩家1,玩家2,玩家4,玩家5,
+		 *            5	   10
+		 *  10   20   15   20
+		 *  20   0    10   30
+		 *  30        0/30    10(发牌)
+		 *  10             
+		 * 1等押注
+		 */
+		Assert.assertEquals("玩家1下注，下一玩家继续", 1,table.bet(player1, 10));
+		
+		table.bet(player1, 10);
+		table.bet(player2, 20);
+		table.bet(player4, 15);
+		table.bet(player5, 20);
+		table.bet(player1, 20);
+		table.giveUp(player2);
+		table.bet(player4, 10);
+		table.bet(player5, 30);
+		table.bet(player1, 30);
+		
+		TexasTableView view=new TexasTableView(table);
+		Assert.assertEquals("玩家4下注前，还是第一轮发牌", 0,view.getSendCardIndex());
+		//table.giveUp(player4);
+		table.bet(player4, 30);
+		view=new TexasTableView(table);
+		Assert.assertEquals("玩家4下注后，轮到玩家5，第二轮发牌", 1,view.getSendCardIndex());
+		table.bet(player5, 10);
+		view=new TexasTableView(table);
+		Assert.assertEquals("轮到玩家1", 1,view.getSendCardIndex());
+	}
+	/**
+	 * 测试玩家轮转是否正确
+	 */
+	@Test
+	public void testWaintNo(){
+		TexasCroupier table=new TexasCroupier(new TexasCroupierConfig(), new TexasCommandProcessor());
+		
+		TexasPlayer player1=new TexasPlayer("P1");
+		player1.setBankroll(1000);
+		TexasPlayer player2=new TexasPlayer("P2");
+		player2.setBankroll(1000);
+		TexasPlayer player4=new TexasPlayer("P4");
+		player4.setBankroll(1000);
+		TexasPlayer player5=new TexasPlayer("P5");
+		player5.setBankroll(1000);
+		table.sitDown(player1, 1);//庄，大盲
+		table.sitDown(player2, 2);//小盲，
 		
 		table.sitDown(player4, 4);
-		table.giveUp(player1);//玩家1放弃，重新开始
-		Assert.assertTrue("应该有3个玩家在玩",3==table.view().getEffectivePlayer());
+		
+		TexasTableView view=new TexasTableView(table);
+		Assert.assertEquals("当前应为玩家2下注",2,view.getBetWatingNo());
+		
+		table.bet(player2, 50);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为玩家1下注",1,view.getBetWatingNo());
+		table.bet(player1, 50);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为玩家2下注",2,view.getBetWatingNo());
 
+		table.bet(player2, 50);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为玩家1下注",1,view.getBetWatingNo());
+		table.bet(player1, 50);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为玩家2下注",2,view.getBetWatingNo());
+
+		table.bet(player2, 50);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为玩家1下注",1,view.getBetWatingNo());
+		table.bet(player1, 50);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为玩家2下注",2,view.getBetWatingNo());
+
+		table.bet(player2, 50);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为玩家1下注",1,view.getBetWatingNo());
+		table.bet(player1, 50);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为玩家2下注",2,view.getBetWatingNo());
+
+		table.bet(player2, 50);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为玩家1下注",1,view.getBetWatingNo());
+		table.bet(player1, 50);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为玩家2下注",2,view.getBetWatingNo());
+
+		table.bet(player2, 50);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为玩家1下注",1,view.getBetWatingNo());
+		table.bet(player1, 50);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为玩家2下注",2,view.getBetWatingNo());
+
+		table.giveUp(player4);
+		view=new TexasTableView(table);
+		Assert.assertEquals("当前应为玩家2下注",2,view.getBetWatingNo());
+		
+		//新开局
+		table.giveUp(player1);
+		
+		/*
+		 * 新开局
+		 * 玩家2为庄家，
+		 * 玩家4小盲，
+		 * 玩家1大盲
+		 * 玩家2等待，
+		 */
+		view=new TexasTableView(table);
+		Assert.assertEquals("玩家2为庄家",2,view.getDealerSeatNo());
+		Assert.assertEquals("当前应为玩家2下注",2,view.getBetWatingNo());
 		
 		
-		Assert.assertEquals(1,table.bet(player1, 10));//庄家
-		log.debug("玩家1下注成功");
-		Assert.assertEquals(1,table.bet(player2, 10));//小盲
-		log.debug("玩家2下注成功");
-		Assert.assertEquals(1,table.bet(player4, 11));//大盲
-		log.debug("玩家4加注成功");
+		/*
+		 * 新开局
+		 * 玩家4为庄家，
+		 * 玩家5小盲，
+		 * 玩家1大盲
+		 * 玩家2等待，
+		 */
+		table.sitDown(player5, 5);
+		table.giveUp(player4);
+		table.giveUp(player2);
+		view=new TexasTableView(table);
+		Assert.assertEquals("玩家4为庄家",4,view.getDealerSeatNo());
+		Assert.assertEquals("当前应为玩家2下注",2,view.getBetWatingNo());
 		
-		Assert.assertEquals(1,table.bet(player1, 10));
-		log.debug("玩家1下注成功");
-		Assert.assertEquals(1,table.bet(player2, 10));
-		log.debug("玩家2下注成功");
-		Assert.assertEquals(1,table.bet(player4, 12));
-		log.debug("玩家4加注成功");
-		table.view();
-		Assert.assertEquals(1,table.bet(player1, 10));
-		log.debug("玩家1下注成功");
-		Assert.assertEquals(1,table.bet(player2, 10));
-		log.debug("玩家2下注成功");
-		Assert.assertEquals(1,table.bet(player4, 12));
-		log.debug("玩家4加注成功");
-		table.view();
-		Assert.assertEquals(1,table.bet(player1, 10));
-		log.debug("玩家1下注成功");
-		Assert.assertEquals(1,table.bet(player2, 10));
-		log.debug("玩家2下注成功");
-		Assert.assertEquals(1,table.bet(player4, 12));
-		log.debug("玩家4加注成功");
-		table.view();
+		TexasPlayer player6=new TexasPlayer("P6");
+		player6.setBankroll(1000);
+		table.sitDown(player6, 0);
+		Assert.assertEquals("玩家6坐下，不影响玩家2下注",2,view.getBetWatingNo());
+		
+		table.giveUp(player2);
+		view=new TexasTableView(table);
+		Assert.assertEquals("玩家2放弃，轮到玩家4下注",4,view.getBetWatingNo());
 		
 		
 	}
-	@Test
+	//@Test
 	public void testBet(){
 		TexasCroupierConfig config=new TexasCroupierConfig();
 		config.setSmallBlinds(5);
@@ -131,8 +300,14 @@ public class TexasCroupierTest {
 		Assert.assertEquals(1,table.bet(player4, 10));
 		log.debug("玩家4下注成功");
 		
+		view=new TexasTableView(table);
+		Assert.assertEquals("应为第一轮押注",0,view.getSendCardIndex());
+		
 		Assert.assertEquals(1,table.bet(player1, 10));
 		log.debug("玩家1下注成功");
+		view=new TexasTableView(table);
+		Assert.assertEquals("应为第二轮押注",1,view.getSendCardIndex());
+		
 		Assert.assertEquals(-1,table.bet(player1, 10));
 		log.debug("仅玩家2可下注");
 		Assert.assertEquals(-1,table.bet(player4, 10));
@@ -141,6 +316,17 @@ public class TexasCroupierTest {
 		log.debug("玩家2下注成功");
 		Assert.assertEquals(1,table.bet(player4, 10));
 		log.debug("玩家4下注成功");
+		Assert.assertEquals(1,table.bet(player1, 10));
+		log.debug("玩家1下注成功");
+		
+		Assert.assertEquals(1,table.bet(player2, 10));
+		
+		log.debug("玩家2下注成功");
+		
+		Assert.assertEquals(1,table.bet(player4, 10));
+		log.debug("玩家4下注成功");
+		Assert.assertEquals(1,table.bet(player1, 10));
+		log.debug("玩家1下注成功");
 		
 	}
 

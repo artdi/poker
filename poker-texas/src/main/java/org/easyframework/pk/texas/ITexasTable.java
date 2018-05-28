@@ -13,6 +13,7 @@ public interface ITexasTable extends ITexasTableView{
 	
 	/**
 	 * 坐下：玩家占领座位<br>玩家够时，并启动游戏。
+	 * <br>庄家确定办法：默认为0坐号，每局开始轮到下一有效玩家，庄家后第一个有效玩家为小盲
 	 * @param player  玩家
 	 * @param seatNo  坐那个位置
 	 * @return 1:成功坐下，且已开始游戏 <br>2:成功坐下，等待开始游戏（游戏人数不够或等待上一局游戏结束）

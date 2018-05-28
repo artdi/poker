@@ -2,10 +2,8 @@ package org.easyframework.pk.texas;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import org.easyframework.pk.PokerCard;
@@ -26,9 +24,7 @@ public class TexasCroupier extends TexasTable{
 	
 	private static final int[] SendCardNum={2,3,1,1};
 	private volatile int sendCardIndex=0;//第几轮发牌
-	private int sendCardIndexAdd=0;//第几轮加注，每轮发牌大盲可加注三次
-	private long sendCardIndexAddMax=0;//本轮加注最大金额
-	private int sendCardIndexAddMaxSeatNo=0;//本轮最大加注谁最先加
+
 	
 	private volatile int dealerSeatNo=0;
 	private volatile int betWatingNo;
@@ -42,6 +38,18 @@ public class TexasCroupier extends TexasTable{
 			ICommandProcessor cmdProcessor) {
 		super(config, cmdProcessor);
 		this.jackpot=new Jackpot(config.getMaxPlayer());
+	}
+	@Override
+	protected void flashWatingPlayer(int seatNo) {
+		try{
+			lock.lock();
+			if(this.betWatingNo==seatNo){
+				this.betWatingNo = nextEffectivePlayer(betWatingNo);
+			}
+		}finally{
+			lock.unlock();
+		}
+		
 	}
 	/**
 	 * 启动游戏
@@ -76,8 +84,7 @@ public class TexasCroupier extends TexasTable{
 			}
 		}
 		sendCardIndex=0;
-		sendCardIndexAdd=0;
-		sendCardIndexAddMax=0;
+		
 		//this.betRecord=new HashMap();
 		this.jackpot.initBetRecord();
 		
@@ -140,9 +147,7 @@ public class TexasCroupier extends TexasTable{
 					}
 				}
 			}
-			this.sendCardIndex++;
-			this.sendCardIndexAdd=0;
-			this.sendCardIndexAddMax=0;
+//			this.sendCardIndex++;
 		}else{
 			return -1;
 		}
@@ -221,28 +226,65 @@ public class TexasCroupier extends TexasTable{
 		if(p.getBankroll()<betNum){
 			return -2;
 		}
+		//TODO 下注金额不能小于本轮最小下注
+		//
+		if(betNum==0){
+			int maxBetSeatNo=this.jackpot.getMaxBetSeatNo(sendCardIndex, this.getEffectivePlayerSeatNo());
+			//最大下注人下注为0,表示跳过
+			if(seatNo==maxBetSeatNo){
+				try{
+					lock.lock();
+					jackpot.addBet(seatNo, this.sendCardIndex, betNum);
+					p.setBankroll(p.getBankroll()-betNum);
+				}finally{
+					lock.unlock();
+				}
+				return dealingOrNextGame();
+			}
+		}else{
 		
-		jackpot.addBet(seatNo, this.sendCardIndex, betNum);
-		p.setBankroll(p.getBankroll()-betNum);
-		this.betWatingNo = nextEffectivePlayer(betWatingNo);
-		//最大押注人继续加注，不发牌，下一玩家继续选择。
-		//最大押注人已加注达3次，发牌未结束，则先发牌，继续下一玩家选择。
-		//最大押注人已加注达3次，发牌已结束，则结束游戏
-		int maxBetSeatNo=this.jackpot.getMaxBetSeatNo(sendCardIndex, this.getEffectivePlayerSeatNo());
-		//下一玩家为最大下注玩家
-		if(maxBetSeatNo==this.betWatingNo){
-			if(this.jackpot.getAddBetNum(maxBetSeatNo, this.sendCardIndex)==CAP){//已下注三次
-				if(this.isLastDealing()){
-					this.endGame();
-					this.tryStartGame();
-					return 2;
-				}else{
-					this.dealing();
+			try{
+				lock.lock();
+				jackpot.addBet(seatNo, this.sendCardIndex, betNum);
+				p.setBankroll(p.getBankroll()-betNum);
+				this.betWatingNo = nextEffectivePlayer(betWatingNo);
+			}finally{
+				lock.unlock();
+			}
+		
+		
+			int maxBetSeatNo=this.jackpot.getMaxBetSeatNo(sendCardIndex, this.getEffectivePlayerSeatNo());
+			//下一玩家为最大下注玩家
+			//最大押注人继续加注，不发牌，下一玩家继续选择。
+					//最大押注人已加注达3次，发牌未结束，则先发牌，继续下一玩家选择。
+					//最大押注人已加注达3次，发牌已结束，则结束游戏
+			if(maxBetSeatNo==this.betWatingNo){
+				if(this.jackpot.getAddBetNum(maxBetSeatNo, this.sendCardIndex)==CAP){//已下注三次
+					return dealingOrNextGame();
 				}
 			}
 		}
-		
 		return 1;
+	}
+	/**
+	 * 发牌 或 下一局游戏
+	 * @return 1：发版，2:下一局游戏
+	 */
+	private int dealingOrNextGame(){
+		if(this.isLastDealing()){
+			this.endGame();
+			this.tryStartGame();
+			return 2;
+		}else{
+			this.dealing();
+			try{
+				lock.lock();
+				this.sendCardIndex++;
+			}finally{
+				lock.unlock();
+			}
+			return 1;
+		}
 	}
 	/**
 	 * 是否是大盲玩家，庄家后面第二有效玩家为大盲玩家。
